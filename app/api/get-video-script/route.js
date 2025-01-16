@@ -7,10 +7,13 @@ export async function POST(req) {
         console.log('>>>>prompt', prompt);
 
         const result = await chatSession.sendMessage(prompt);
-        console.log('>>>>response from getting video script',result.response.text);
+        console.log('>>>>response from getting video script',result);
+
+        const responseText = await result.response.text();
+        console.log('>>>>responseText',responseText);
 
         return NextResponse.json({
-            result:JSON.parse(result.response.text)
+            result:JSON.parse(responseText)
         })
 
 
