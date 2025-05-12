@@ -7,14 +7,17 @@ import { Button } from '@/components/ui/button'
 import axios from 'axios'
 import { toast } from "sonner"
 import CustomLoader from './_components/CustomLoader'
+import { v4 as uuidv4 } from 'uuid';
 
+
+const scriptData = 'Once upon a time, there was a robot named Sparky. He loved exploring!One day, he found a special seed. It glowed with a strange, magical light.He planted it, and it grew into a giant, candy tree overnight!Sparky shared the candy with all his friends. They all lived happily ever after!'
 const CreateNew = () => {
   const [formData,setFormData] = useState([]);
   const [loading,setLoading] = useState(false);
-  const [videoScript,setVideoScript] = useState('');
+  const [videoScript,setVideoScript] = useState([]);
+  const [audioFileUrl, setAudioFileUrl] = useState();
 
   const onHandleInputChange = (fieldName,fieldValue)=>{
-    console.log('>>>>fieldName & fieldValue',fieldName,fieldValue);
     setFormData({
       ...formData,
       [fieldName]:fieldValue
@@ -22,7 +25,8 @@ const CreateNew = () => {
   }
 
   const createNewButtonClickHandler = () =>{
-    getVideoScript();
+    // getVideoScript();
+    generateAudioFile();
   }
 
   // Get video script
@@ -33,14 +37,31 @@ const CreateNew = () => {
       const result = await axios.post('/api/get-video-script',{
         prompt
       });
-      console.log('>>>script',result.data.result.response);
+      setVideoScript(result.data.result.response);
+      generateAudioFile(result.data.result.response);
       setLoading(false);
 
     }catch(err){
       console.log('Error while getting video script',err);
       toast('Error while getting video script, Please try again later');
     }
-    
+  }
+
+  const generateAudioFile = async (videoScriptData) => {
+    setLoading(true);
+    let script = '';
+    const id = uuidv4();
+    // videoScriptData.forEach(item => {
+    //   script += item.contentText;
+    // })
+
+    const response = await axios.post('/api/generate-audio',{
+      text: scriptData,
+      id
+    });
+    setAudioFileUrl(response?.data?.audioUrl);
+    setLoading(false);
+
   }
 
   return (
