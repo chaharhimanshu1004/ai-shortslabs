@@ -15,10 +15,9 @@ export async function POST(req) {
         };
 
         const transcript = await client.transcripts.transcribe(params);
-        console.log("Transcription result:", transcript.words);
         return NextResponse.json({
             result: "Transcription completed successfully",
-            captions: transcript,
+            captions: transcript.words,
         });
     } catch (error) {
         console.error("Error during generating captions:", error);
