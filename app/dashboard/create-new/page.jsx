@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import SelectTopic from './_components/SelectTopic'
 import SelectStyle from './_components/SelectStyle'
 import SelectDuration from './_components/SelectDuration'
@@ -8,14 +8,10 @@ import axios from 'axios'
 import { toast } from "sonner"
 import CustomLoader from './_components/CustomLoader'
 import { v4 as uuidv4 } from 'uuid';
+import { VideoDataContext } from '@/app/_context/VideoDataContext'
 
 
-const VIDEO_SCRIPT = [{
-  "scene": 1,
-  "imagePrompt": "A photorealistic painting of a Roman soldier standing guard in front of the Colosseum, with a bustling crowd and gladiators entering the arena.",
-  "contentText": "The Colosseum in Rome wasn't just for gladiator fights. It also hosted mock naval battles!"
-},
-]
+
 const CreateNew = () => {
   const [formData,setFormData] = useState([]);
   const [loading,setLoading] = useState(false);
@@ -23,6 +19,8 @@ const CreateNew = () => {
   const [audioFileUrl, setAudioFileUrl] = useState();
   const [captions, setCaptions] = useState([]);
   const [imageList, setImageList] = useState([]);
+
+  const { videoData, setVideoData } = useContext(VideoDataContext);
 
   const onHandleInputChange = (fieldName,fieldValue)=>{
     setFormData({
@@ -32,10 +30,7 @@ const CreateNew = () => {
   }
 
   const createNewButtonClickHandler = () =>{
-    // getVideoScript();
-    // generateAudioFile();
-    // generateAudioCaptions(FILE_URL);
-    generateImage()
+    getVideoScript();
   }
 
   // Get video script
@@ -46,16 +41,22 @@ const CreateNew = () => {
       const result = await axios.post('/api/get-video-script',{
         prompt
       });
-      setVideoScript(result.data.result.response);
-      generateAudioFile(result.data.result.response);
-      setLoading(false);
-
+      const response = result?.data?.result?.response;
+      if (response) {
+        setVideoData(prev => ({
+          ...prev,
+          videoScript: response
+        }))
+        setVideoScript(result.data.result.response);
+        await generateAudioFile(result.data.result.response);
+      }
     }catch(err){
       console.log('Error while getting video script',err);
       toast('Error while getting video script, Please try again later');
     }
   }
 
+  // generate audio
   const generateAudioFile = async (videoScriptData) => {
     setLoading(true);
     let script = '';
@@ -65,39 +66,61 @@ const CreateNew = () => {
     })
 
     const response = await axios.post('/api/generate-audio',{
-      text: scriptData,
+      text: script,
       id
     });
-    setAudioFileUrl(response?.data?.audioUrl);
-    generateAudioCaptions(response?.data?.audioUrl);
-    setLoading(false);
+    const audioUrl = response?.data?.audioUrl;
+    setVideoData(prev => ({
+      ...prev,
+      'audioFileUrl': audioUrl
+    }))
+    setAudioFileUrl(audioUrl);
+    audioUrl && generateAudioCaptions(response?.data?.audioUrl, videoScriptData);
 
   }
 
-  const generateAudioCaptions = async (audioUrl) => {
+  // generate captions
+  const generateAudioCaptions = async (audioUrl, videoScriptData) => {
     setLoading(true);
     const response = await axios.post('/api/generate-captions', {
       audioUrl
     });
-    setCaptions(response?.data?.captions);
-    generateImage();
+    const result = response?.data?.captions;
+    setCaptions(result);
+    setVideoData(prev => ({
+      ...prev,
+      'captions': result
+    }))
+    setLoading(false);
+    result && generateImage(videoScriptData);
+  }
+  // generate image
+  const generateImage = async (videoScriptData) => {
+    setLoading(true);
+    let images = [];
+    for (const item of videoScriptData) {
+      try {
+        const res = await axios.post('/api/generate-image', {
+          prompt: item.imagePrompt
+        })
+        const imageUrl = res?.data?.imageUrl;
+        setVideoData(prev => ({
+          ...prev,
+          'imageList': imageUrl
+        }))
+        images.push(imageUrl);
+      } catch (err) {
+        console.log('Error while generating a image', err);
+      }
+    }
+   
+    setImageList(images)
     setLoading(false);
   }
 
-  const generateImage = async () => {
-    setLoading(true);
-    let images = [];
-    VIDEO_SCRIPT.forEach(async (item) => {
-      const response = await axios.post('/api/generate-image', {
-        prompt: item.imagePrompt
-      });
-      console.log('Image URL:', response.data.imageUrl);
-      images.push(response.data.imageUrl);
-    });
-    console.log('>>>here are the final images: ', images)
-    setImageList
-    setLoading(false);
-  }
+  useEffect(() => {
+    console.log(videoData)
+  }, [videoData])
 
   return (
     <div className='md:px-20 '>
