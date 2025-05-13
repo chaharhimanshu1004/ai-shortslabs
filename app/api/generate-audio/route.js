@@ -12,7 +12,7 @@ export async function POST(req) {
     try {
 
         const { text, id } = await req.json();
-        const storageRef = ref(storage,'ai-shortslab/'+id+'.mp3')
+        const storageRef = ref(storage,'ai-shortslab/audio/'+id+'.mp3')
         const request = {
             input: { text: text },
             voice: { languageCode: 'en-US', ssmlGender: 'FEMALE' },
