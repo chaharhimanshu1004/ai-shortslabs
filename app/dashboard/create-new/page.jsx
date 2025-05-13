@@ -34,11 +34,11 @@ const CreateNew = () => {
   }
 
   // Get video script
-  const getVideoScript = async ()=>{
+  const getVideoScript = async () => {
     setLoading(true);
     const prompt = `Write a script to generate ${formData.duration} video on topic : ${formData.topic} with AI image prompt in ${formData.style} format for each scene and give me result in JSON format with imagePrompt and contentText as field, No plain Text`;
-    try{
-      const result = await axios.post('/api/get-video-script',{
+    try {
+      const result = await axios.post('/api/get-video-script', {
         prompt
       });
       const response = result?.data?.result?.response;
@@ -50,8 +50,8 @@ const CreateNew = () => {
         setVideoScript(result.data.result.response);
         await generateAudioFile(result.data.result.response);
       }
-    }catch(err){
-      console.log('Error while getting video script',err);
+    } catch (err) {
+      console.log('Error while getting video script', err);
       toast('Error while getting video script, Please try again later');
     }
   }
@@ -65,7 +65,7 @@ const CreateNew = () => {
       script += item.contentText;
     })
 
-    const response = await axios.post('/api/generate-audio',{
+    const response = await axios.post('/api/generate-audio', {
       text: script,
       id
     });
@@ -113,7 +113,7 @@ const CreateNew = () => {
         console.log('Error while generating a image', err);
       }
     }
-   
+
     setImageList(images)
     setLoading(false);
   }
