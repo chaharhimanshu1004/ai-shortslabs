@@ -53,46 +53,57 @@ const CreateNew = () => {
     } catch (err) {
       console.log('Error while getting video script', err);
       toast('Error while getting video script, Please try again later');
+      setLoading(false)
     }
   }
 
   // generate audio
   const generateAudioFile = async (videoScriptData) => {
     setLoading(true);
-    let script = '';
-    const id = uuidv4();
-    videoScriptData.forEach(item => {
-      script += item.contentText;
-    })
+    try {
+      let script = '';
+      const id = uuidv4();
+      videoScriptData.forEach(item => {
+        script += item.contentText;
+      });
 
-    const response = await axios.post('/api/generate-audio', {
-      text: script,
-      id
-    });
-    const audioUrl = response?.data?.audioUrl;
-    setVideoData(prev => ({
-      ...prev,
-      'audioFileUrl': audioUrl
-    }))
-    setAudioFileUrl(audioUrl);
-    audioUrl && generateAudioCaptions(response?.data?.audioUrl, videoScriptData);
-
+      const response = await axios.post('/api/generate-audio', {
+        text: script,
+        id
+      });
+      const audioUrl = response?.data?.audioUrl;
+      setVideoData(prev => ({
+        ...prev,
+        'audioFileUrl': audioUrl
+      }));
+      setAudioFileUrl(audioUrl);
+      audioUrl && generateAudioCaptions(response?.data?.audioUrl, videoScriptData);
+    } catch (err) {
+      console.log('Error while generating audio file', err);
+      toast('Error while generating audio file, Please try again later');
+      setLoading(false);
+    }
   }
 
   // generate captions
   const generateAudioCaptions = async (audioUrl, videoScriptData) => {
     setLoading(true);
-    const response = await axios.post('/api/generate-captions', {
-      audioUrl
-    });
-    const result = response?.data?.captions;
-    setCaptions(result);
-    setVideoData(prev => ({
-      ...prev,
-      'captions': result
-    }))
-    setLoading(false);
-    result && generateImage(videoScriptData);
+    try {
+      const response = await axios.post('/api/generate-captions', {
+        audioUrl
+      });
+      const result = response?.data?.captions;
+      setCaptions(result);
+      setVideoData(prev => ({
+        ...prev,
+        'captions': result
+      }));
+      result && generateImage(videoScriptData);
+    } catch (err) {
+      console.log('Error while generating captions', err);
+      toast('Error while generating captions, Please try again later');
+      setLoading(false);
+    } 
   }
   // generate image
   const generateImage = async (videoScriptData) => {
@@ -103,17 +114,16 @@ const CreateNew = () => {
         const res = await axios.post('/api/generate-image', {
           prompt: item.imagePrompt
         })
-        const imageUrl = res?.data?.imageUrl;
-        setVideoData(prev => ({
-          ...prev,
-          'imageList': imageUrl
-        }))
+        const imageUrl = res?.data?.result;
         images.push(imageUrl);
       } catch (err) {
         console.log('Error while generating a image', err);
       }
     }
-
+    setVideoData(prev => ({
+      ...prev,
+      'imageList': images
+    }))
     setImageList(images)
     setLoading(false);
   }
