@@ -9,6 +9,9 @@ import { toast } from "sonner"
 import CustomLoader from './_components/CustomLoader'
 import { v4 as uuidv4 } from 'uuid';
 import { VideoDataContext } from '@/app/_context/VideoDataContext'
+import { db } from '@/configs/db'
+import { useUser } from '@clerk/nextjs'
+import { VideoData } from '@/configs/schema'
 
 
 
@@ -19,6 +22,8 @@ const CreateNew = () => {
   const [audioFileUrl, setAudioFileUrl] = useState();
   const [captions, setCaptions] = useState([]);
   const [imageList, setImageList] = useState([]);
+
+  const { user } = useUser();
 
   const { videoData, setVideoData } = useContext(VideoDataContext);
 
@@ -129,8 +134,31 @@ const CreateNew = () => {
   }
 
   useEffect(() => {
-    console.log(videoData)
-  }, [videoData])
+    console.log(videoData);
+    if(Object.keys(videoData).length == 4){
+      saveVideoData(videoData);
+    }
+  }, [videoData]);
+
+  const saveVideoData = async (videoData) => {
+    setLoading(true);
+    try {
+      const result = await db.insert(VideoData).values({
+        script: videoData.videoScript,
+        audioFileUrl: videoData.audioFileUrl,
+        captions: videoData.captions,
+        imageList: videoData.imageList,
+        createdBy: user?.primaryEmailAddress?.emailAddress
+      }).returning({ id: VideoData.id });
+
+      console.log('>>>result is here',result);
+      setLoading(false);
+    } catch (err) {
+      console.log('Error while saving video data', err);
+      toast('Error while saving video data, Please try again later');
+      setLoading(false);
+    }
+  }
 
   return (
     <div className='md:px-20 '>
