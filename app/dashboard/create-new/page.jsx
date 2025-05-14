@@ -48,7 +48,7 @@ const CreateNew = () => {
           videoScript: response
         }))
         setVideoScript(result.data.result.response);
-        await generateAudioFile(result.data.result.response);
+        generateAudioFile(result.data.result.response);
       }
     } catch (err) {
       console.log('Error while getting video script', err);
