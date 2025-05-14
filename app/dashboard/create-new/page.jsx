@@ -12,6 +12,7 @@ import { VideoDataContext } from '@/app/_context/VideoDataContext'
 import { db } from '@/configs/db'
 import { useUser } from '@clerk/nextjs'
 import { VideoData } from '@/configs/schema'
+import PlayerDialog from '../_components/PlayerDialog'
 
 
 
@@ -22,6 +23,8 @@ const CreateNew = () => {
   const [audioFileUrl, setAudioFileUrl] = useState();
   const [captions, setCaptions] = useState([]);
   const [imageList, setImageList] = useState([]);
+  const [playVideo, setPlayVideo] = useState(true);
+  const [videoId, setVideoId] = useState(1);
 
   const { user } = useUser();
 
@@ -151,7 +154,8 @@ const CreateNew = () => {
         createdBy: user?.primaryEmailAddress?.emailAddress
       }).returning({ id: VideoData.id });
 
-      console.log('>>>result is here',result);
+      setVideoId(result[0].id);
+      setPlayVideo(true);
       setLoading(false);
     } catch (err) {
       console.log('Error while saving video data', err);
@@ -178,6 +182,8 @@ const CreateNew = () => {
       </div>
 
       <CustomLoader loading={loading} />
+
+      <PlayerDialog playVideo={ playVideo } videoId={ videoId } />
 
     </div>
   )
