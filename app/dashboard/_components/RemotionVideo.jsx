@@ -1,5 +1,5 @@
 import React from 'react'
-import { AbsoluteFill, Img, Sequence, useVideoConfig, Audio, useCurrentFrame, staticFile } from 'remotion'
+import { AbsoluteFill, Img, Sequence, useVideoConfig, Audio, useCurrentFrame, staticFile, interpolate } from 'remotion'
 
 function RemotionVideo({ script, audioFileUrl, captions, imageList, setDurationInFrames }) {
 
@@ -25,6 +25,18 @@ function RemotionVideo({ script, audioFileUrl, captions, imageList, setDurationI
       {
         imageList?.map((item, index) => {
           const startTime = ((index * getDurationFrame()) / imageList?.length);
+          const duration = getDurationFrame();
+
+          const scale = (index) =>  interpolate(
+            frame,
+            [startTime, startTime + duration/2, startTime + duration], // zoom-in zoom-out 
+            index % 2 == 0 ? [1, 1.8, 1] : [1.8, 1, 1.8],
+            {
+              extrapolateLeft: 'clamp',
+              extrapolateRight: 'clamp',
+            }
+
+          )
           return (
             <>
               <Sequence key={index} from={startTime} durationInFrames={getDurationFrame()}>
@@ -33,6 +45,7 @@ function RemotionVideo({ script, audioFileUrl, captions, imageList, setDurationI
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
+                    transform: `scale(${scale(index)})`,
                   }} />
                   <AbsoluteFill style={{
                     color: 'white',
