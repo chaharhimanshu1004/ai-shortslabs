@@ -53,6 +53,7 @@ function PlayerDialog({ playVideo, videoId }) {
                                     setDurationInFrames(duration);
                                 }
                             }}
+                            // logLevel="trace"
                         />
                         <div className='flex gap-10 mt-8'>
                             <Button variant='outline'>
