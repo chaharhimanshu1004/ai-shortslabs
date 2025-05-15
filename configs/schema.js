@@ -1,5 +1,5 @@
 
-import { pgTable, serial, varchar, boolean, json } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, boolean, json, integer } from "drizzle-orm/pg-core";
 
 export const Users = pgTable('users',{
     id: serial('id').primaryKey(),
@@ -7,6 +7,7 @@ export const Users = pgTable('users',{
     email: varchar('email').notNull(),
     imageUrl: varchar('imageUrl'),
     subscription: boolean('subscription').default(false),
+    credits: integer('credits').default(30),
 })
 
 export const VideoData = pgTable('videoData', {
