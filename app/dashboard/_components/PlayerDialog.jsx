@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { db } from '@/configs/db';
 import { VideoData } from '@/configs/schema';
 import { eq } from 'drizzle-orm';
+import { useRouter } from 'next/navigation'
 
 
 
@@ -22,6 +23,8 @@ function PlayerDialog({ playVideo, videoId }) {
     const [openDialog, setOpenDialog] = useState(false);
     const [videoData, setVideoData] = useState();
     const [durationInFrames, setDurationInFrames] = useState(120); // ex : 120 frames :: 30 fps == 120/30 = 4 seconds 
+
+    const router = useRouter();
 
     useEffect(() => {
         setOpenDialog(playVideo);
@@ -56,7 +59,7 @@ function PlayerDialog({ playVideo, videoId }) {
                             // logLevel="trace"
                         />
                         <div className='flex gap-10 mt-8'>
-                            <Button variant='outline'>
+                            <Button variant='outline' onClick={() => { router.replace('/dashboard') }}>
                                 Cancel
                             </Button>
                             <Button>
