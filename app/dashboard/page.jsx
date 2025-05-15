@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CirclePlus } from 'lucide-react';
 import EmptyState from './_components/EmptyState';
@@ -8,6 +8,7 @@ import { VideoData } from '@/configs/schema';
 import { db } from '@/configs/db';
 import { eq } from 'drizzle-orm';
 import { useUser } from '@clerk/nextjs';
+import VideoList from './_components/VideoList';
 
 const Dashboard = () => {
   const [videoList, setVideoList] = useState([]);
@@ -40,6 +41,8 @@ const Dashboard = () => {
             <EmptyState />
           </div>
       }
+      <VideoList videoList={videoList} />
+
     </div>
   )
 }

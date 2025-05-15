@@ -27,7 +27,7 @@ function PlayerDialog({ playVideo, videoId }) {
     const router = useRouter();
 
     useEffect(() => {
-        setOpenDialog(playVideo);
+        setOpenDialog(!openDialog);
         videoId && getVideoData();
     }, [playVideo])
 
@@ -59,7 +59,7 @@ function PlayerDialog({ playVideo, videoId }) {
                             // logLevel="trace"
                         />
                         <div className='flex gap-10 mt-8'>
-                            <Button variant='outline' onClick={() => { router.replace('/dashboard') }}>
+                            <Button variant='outline' onClick={() => { router.replace('/dashboard'); setOpenDialog(false) }}>
                                 Cancel
                             </Button>
                             <Button>
